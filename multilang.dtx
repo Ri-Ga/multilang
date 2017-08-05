@@ -1,0 +1,1748 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2016-2017 by Richard Gay <richard.gay@t-online.de>
+% -------------------------------------------------------
+% 
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.2
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.2 or later is part of all distributions of LaTeX 
+% version 1999/12/01 or later.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{multilang.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<pkgtags>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<pkgsect>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<package>\ProvidesPackage{multilang}
+%<*package>
+    [2017/08/30 v0.9 Tools for maintaining documents in multiple languages]
+%</package>
+%<pkgtags>\ProvidesPackage{multilang-tags}[2017/08/30 v0.9 Filtering of multilingual macros by tags]
+%<pkgsect>\ProvidesPackage{multilang-sect}[2017/08/30 v0.9 Multilingual sectioning environments]
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[columns=2]{idxlayout}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage[inline]{enumitem}
+\usepackage{showexpl}
+\lstset{gobble=2,frame=trbl,backgroundcolor=\color{black!5!white},width=0.475\textwidth}
+\lstset{basicstyle=\footnotesize\fontfamily{pcr}\selectfont}
+\lstset{explpreset={columns=fixed,numbers=none,language={}}}
+\lstset{preset={\small\sffamily},overhang=2cm,pos=r,varwidth=false}
+\usepackage{pbox}
+\newcommand\NiceDescribeStuff[2]{% #1=margin text, #2=body text
+  \medskip\par\noindent\leavevmode%
+  \marginpar{\hfill\pbox[t]{2\marginparwidth}{\ttfamily #1}%
+    \hspace*{-\marginparsep}}%
+  \ifstrempty{#2}{}{#2\smallskip\\}}
+\newcommand\NiceDescribeEnv[3][]{% #1=index list, #2=envname, #3=parameters
+  \NiceDescribeStuff{%
+    \textcolor{gray}{\cs{begin}}\string{#2\string}\\
+    \textcolor{gray}{\cs{end}}\string{#2\string}}{#3}%
+  \ifstrempty{#1}
+    {\SpecialEnvIndex{#1}}%
+    {\forcsvlist{\SpecialEnvIndex}{#1}}%
+  \ignorespaces}
+\newcommand\NiceDescribeMacro[2]{% #1=macro, #2=parameters
+  \NiceDescribeStuff{\hbox to 0pt{\hss\string#1}}{#2}%
+  \SpecialUsageIndex{#1}\ignorespaces}
+\newcommand\NiceDescribeConstant[1]{% #1=constant
+  \NiceDescribeStuff{\hbox to 0pt{\hss #1\quad}}{}\ignorespaces}
+\makeatletter
+\newcommand\SaveSecs{%
+  \@for\SC:=section,subsection,subsubsection\do{%
+    \csedef{SC@\SC}{\the\value{\SC}}%
+    \setcounter{\SC}{0}}}
+\newcommand\RestoreSecs{%
+  \@for\SC:=section,subsection,subsubsection\do{%
+    \setcounter{\SC}{\csuse{SC@\SC}}}}
+\makeatother
+\newcommand\ThisPackage{\textsf{multilang}\xspace}
+\usepackage{hypdoc}
+\usepackage[capitalise,nameinlink]{cleveref}
+% the following packages are for the examples
+\usepackage[german,english]{babel}
+\usepackage[languages={english,german}]{multilang}
+\usepackage[autostyle=true]{csquotes}
+\usepackage[useregional]{datetime2}
+\usepackage{sectionbox}
+\usepackage{translations}
+\usepackage{multilang-tags}
+\usepackage{multilang-sect}
+% end of examples packages
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{multilang.dtx}
+  \PrintChanges
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \changes{v0.9}{2017/08/12}{Initial version}
+%
+% \GetFileInfo{multilang.dtx}
+%
+% \DoNotIndex{\newcommand,\newenvironment,\def,\gdef,\edef}
+%
+%
+% \title{The \ThisPackage package\thanks{This document
+%   corresponds to \ThisPackage~\fileversion, dated \filedate.
+%   The package is available online at
+%   \url{http://www.ctan.org/pkg/multilang} and
+%   \url{https://github.com/Ri-Ga/multilang}.}}
+% \author{Richard Gay \\ \texttt{richard.gay@t-online.de}}
+%
+% \maketitle
+%
+% \begin{abstract}
+%   Maintaining a \LaTeX{} document with translations for multiple languages
+%   can be cumbersome and error-prone.
+%   The \ThisPackage package provides a set of macros for defining macros and
+%   environments as wrappers around existing macros and environments.
+%   These wrappers allow one to clearly specify multiple translations for the
+%   arguments to the wrapped macros and environments while only the
+%   translation of the document's language is actually shown.
+%   Choosing a translation then is as simple as choosing the document's
+%   language via \textsf{babel} or \textsf{polyglossia}.
+% \end{abstract}
+%
+% \section{Introduction}
+% \label{sec:Introduction}
+%
+% The main goal of the \ThisPackage package is to facilitate the
+% definition of macros and environments with which documents can be
+% provisioned in multiple languages.
+% To be more concrete, \ThisPackage facilitates
+% \begin{enumerate}
+% \item the specification of content translations:
+%
+%   \begin{itemize}[noitemsep]
+%   \item Arguments to macros are specified by their name such that multiple
+%     translations do not clutter up the \LaTeX{} code that easily.
+%   \item If you forget to specify a mandatory argument in a language,
+%     \ThisPackage shows an error when you compile for that language.
+%   \end{itemize}
+%
+% \item the maintenance of translations:\smallskip
+%
+%   Translations of content that is passed as an argument to a macro can be kept
+%   closely together such that you can keep track of which units belong together
+%   and can keep consistency among translations across content changes.
+%
+% \item the selection of a document language:\smallskip
+%
+%   You simply specify the language with \textsf{babel} or \textsf{polyglossia}
+%   and \ThisPackage selects the translation you provided for the language.
+% \end{enumerate}
+%
+% The motivating example that lead to the development of this package are CVs
+% (curricula vitae). Suppose you want to maintain a CV document that contains
+% the union of all your relevant personal data, education, achievements, etc.
+% You update the CV from time to time with new achievements. Since you want to
+% prepare for the possibility that you might apply nationally as well as
+% internationally, you maintain the CV document in multiple languages (e.g.,
+% your mother language and English).
+% When you use the CV in a concrete job application, you
+% \begin{enumerate*}[label=(\arabic*)]
+% \item filter out all details that are irrelevant for the position that you
+%   apply for
+%   and
+% \item select a suitable language for the employer.
+% \end{enumerate*}
+%
+% This package provides a set of basic macros for the definition of
+% multilingual macros and multilingual environments. The following example
+% illustrates such a macro and how it could be used.
+% \SaveSecs
+%
+% \begin{LTXexample}[preset={\newcommand\Sec[1]{\section{Foobar}}}]
+% % ...
+% \usepackage[german,english]{babel}
+% \usepackage[languages={english,german}]
+%            {multilang}
+% % ...
+% \begin{document}
+% \Sec{
+%   title/english={Foobar},
+%   title/german ={Dingsda}
+% }
+% ...
+% \end{document}
+% \end{LTXexample}
+% \RestoreSecs
+% \Cref{sec:Usage} describes how a macro such as |\Sec| in the above
+% example can be defined with \ThisPackage. The \lcnamecref{sec:Usage} also
+% describes how analogous environments can be defined.
+% \Cref{sec:Types} describes extensible argument types.
+% \Cref{sec:Extensions} describes two extension packages,
+% \textsf{multilang-sect} and \textsf{multilang-tags} for multilingual
+% sectioning and, respectively, for filtering multilingual macros and
+% environments.
+%
+%
+% \section{Usage}
+% \label{sec:Usage}
+%
+% \subsection{Package Options}
+%
+% \NiceDescribeConstant{languages}
+% The \ThisPackage package has a single option: |languages|. This option
+% expects a comma-separated list of language names. The ordering of the list
+% does not make a difference. Through this option, one sets the languages for
+% which translations can be provided. By default, the list is empty such that
+% no translations can be specified.
+% The example in \cref{sec:Introduction} demonstrates how this option can be
+% used.
+%
+%
+% \subsection{Multilingual Macros}
+% \label{sec:Usage-Macros}
+%
+% \NiceDescribeMacro{\NewMultilangCmd}{\marg{command}\marg{options}}
+% A multilingual macro can be defined via the |\NewMultilangCmd| macro.
+% The macro defines \meta{command} as a macro that accepts a single argument.
+% That is, the signature of \meta{command} is \meta{command}\marg{kvarg}. The
+% argument, \meta{kvarg}, is a comma-separated key-value list.
+% The \meta{options} argument takes the form of a comma-separated key-value
+% list and specifies what \meta{command} does, including how \meta{kvarg} is
+% interpreted. The following keys are defined for \meta{options}:
+% \begin{description}[noitemsep]
+% \item[|command|:]
+%   This key is to be used in the form ``|command=|\meta{c}'', where \meta{c}
+%   is an already existing command.
+%   The key specifies that \meta{command} is defined to invoke \meta{c} with
+%   some arguments.
+%   Example: see \cref{sec:Usage-margs}.
+% \item[|margs|:]
+%   This key is to be used in the form ``|margs={|\meta{csvlist}|}|'', where
+%   \meta{csvlist} is a comma-separated list of names.
+%   The key specifies names for the mandatory arguments of \meta{c}, in the
+%   order specified.
+%   If \meta{c} is a macro that takes $n$ mandatory arguments, then
+%   \meta{csvlist} should be a list of $n$ names. If \meta{arg-i} is the
+%   $i$-th entry in \meta{csvlist}, then the $i$-th mandatory
+%   argument to \meta{c} can be specified as \meta{v} in the invocation of
+%   \meta{command} as follows:
+%      ``\meta{command}|{...,|\meta{arg-i}|=|\meta{v}|,...}|''.
+%   Example: see \cref{sec:Usage-margs}.
+% \item[|oargs|:]
+%   This key is to be used in the form ``|oargs={|\meta{csvlist}|}|'', where
+%   \meta{csvlist} is a comma-separated list of names.
+%   This key is analogous to |margs|, but for optional arguments to \meta{c}.
+%   Example: see \cref{sec:Usage-oargs}.
+% \item[|starred|:]
+%   This key is to be used simply as
+%     ``|starred=|\meta{bool}'', where \meta{bool} must be |true| or |false|,
+%   or just as ``|starred|'', which is equivalent to ``|starred=true|''.
+%   If \meta{bool} is |true|, then ``\meta{command}|*{...}|'' can be used to
+%   invoke ``\meta{c}|*...|''.
+%   Example: see \cref{sec:Usage-starred}.
+% \item[|disablable|:]
+%   This key is to be used simply as
+%     ``|disablable=|\meta{bool}'', where \meta{bool} must be |true| or |false|,
+%   or just as ``|disablable|'', which is equivalent to ``|disablable=true|''.
+%   If \meta{bool} is |true|, then the invocation of \meta{c} in
+%   \meta{command} can be suppressed via
+%   ``\meta{command}|{...,disabled,...}|''.
+%   Example: see \cref{sec:Usage-disablable}.
+% \item[|defaults|:]
+%   This key is to be used as
+%   ``|defaults={...,|\meta{arg}|=|\meta{value}|,...}|''.
+%   Each key \meta{arg} should be the name of an optional or mandatory
+%   argument and \meta{value} should be the intended default value for this
+%   argument.
+%   Example: see \cref{sec:Usage-defaults}.
+% \item[|alias/...|:]
+%   This key is to be used as ``|alias/|\meta{name}|={|\meta{arglist}|}|'',
+%   where \meta{name} specifies the name of the alias and \meta{arglist} is a
+%   possibly empty comma-separated list of argument names (optional or
+%   mandatory arguments allowed).
+%   Example: see \cref{sec:Usage-alias}.
+% \end{description}
+% The remainder of \cref{sec:Usage-Macros} provides examples based on the
+% |\section| macro.
+%
+%
+% \subsubsection{Basic Usage}
+% \label{sec:Usage-margs}
+% The following example shows how the |\Section| macro used in the example of
+% \cref{sec:Introduction} can be defined. We leave out the \textsf{babel} code
+% in this \lcnamecref{sec:Usage} for more concise example code.
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={NewMultilangCmd,command,margs}]
+% \NewMultilangCmd{\Sec}{
+%   command=\section, margs=title}
+% \Sec{
+%   title/english={Foobar},
+%   title/german ={Dingsda}
+% }
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \paragraph{Language-independent arguments.}
+% Sometimes, arguments to macros need no translation. For instance, if an
+% argument is a technical term or a name, it can remain in the original
+% language. To avoid redundancy, in such instances the language part of a
+% mandatory or optional argument can be omitted to specify the argument for
+% all languages.
+%
+% \SaveSecs
+% \begin{LTXexample}[preset={\NewMultilangCmd{\Sec}{margs=title,oargs=short,command=\section}}]
+% \Sec{title=multilang}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \paragraph{Forced foreign-language arguments.}
+% \label{sec:Usage-forced-language}
+% A particular instance of a language-independent argument is the case in which
+% the argument shall explicitly be typeset in a particular language. For
+% instance, the argument might use macros that internally determine the
+% display based on the selected language. The following example shows the case
+% of forcing German display of the |\enquote| macro.
+% 
+% \SaveSecs
+% \begin{LTXexample}[preset={\NewMultilangCmd{\Sec}{margs=title,oargs=short,command=\section}}]
+% \usepackage[autostyle=true]{csquotes}
+% %...
+% \Sec{title/german!=\enquote{multilang}}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsubsection{Optional Arguments}
+% \label{sec:Usage-oargs}
+% Macros like |\section| don't just have a mandatory argument (the section
+% title) but also an optional argument (a short title for the table of
+% contents). We can make this optional argument accessible via the |oargs|
+% option as follows.
+% The displayed result does not show any difference as we don't have the table
+% of contents here.
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={oargs}]
+% \NewMultilangCmd{\Sec}{
+%   command=\section, margs=title, oargs=short}
+% \Sec{
+%   title/english={Foobar},
+%   title/german ={Dingsda},
+%   short/english={F},
+%   short/german ={D},
+% }
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsubsection{Starred Macros}
+% \label{sec:Usage-starred}
+% Some macros can be altered in their behavior with a star (``|*|'') after the
+% macro. The |\section| command is an example of such a macro: |\section*|
+% suppresses the display of the section number. The star can be transferred to
+% the command defined via |\NewMultilangCmd| as the following example
+% illustrates.  Note the exclamation mark after ``|german|''.
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={starred}]
+% \NewMultilangCmd{\Sec}{starred,
+%   command=\section, margs=title, oargs=short}
+% \Sec{title=Foo}
+% \Sec*{title=Bar}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsubsection{Disabling Display}
+% \label{sec:Usage-disablable}
+% When a macro is defined with the |disablable| option, it can be passed the
+% |disabled| argument which disables the display of the macro. One might
+% consider this a nicer way to disable content than commenting out the macro.
+% 
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={disablable}]
+% \NewMultilangCmd{\Sec}{disablable,
+%   command=\section, margs=title, oargs=short}
+% \Sec{title=Foo}
+% \Sec{title=Bar,disabled}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsubsection{Default Arguments}
+% \label{sec:Usage-defaults}
+% When a mandatory or optional argument shall by default assume a particular
+% value if no value is specified for the argument in the argument to
+% \meta{command}, this can be specified via the |defaults| key as the
+% following example demonstrates.
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={defaults}]
+% \NewMultilangCmd{\Sec}{
+%   command=\section, margs=title,
+%   defaults={title={???}}}
+% \Sec{}
+% \end{LTXexample}
+% \RestoreSecs
+% Defaults can be particularly useful for mandatory arguments of commands
+% that take multiple arguments and that can often be left empty.
+% Essentially, argument defaults turn mandatory arguments of
+% macros to optional arguments.
+%
+%
+% \subsubsection{Argument Aliases}
+% \label{sec:Usage-alias}
+% Aliases allow one to specify argument names of three different kinds:
+% \begin{description}[nosep]
+% \item[direct aliases:]
+%   A direct alias declares an argument name that can then be used as a
+%   substitute for some mandatory or optional argument.
+%   The |heading| argument in the following example shows how direct aliases
+%   can be declared.
+% \item[combiner aliases:]
+%   A combiner alias declares an argument name that acts as a substitute for a
+%   sequence of mandatory or optional arguments.
+%   Such aliases particularly help maintaining concise \LaTeX{} source code
+%   when argument values are rather short, as |both| in the following example
+%   shows.
+% \item[comment aliases:]
+%   A comment alias declares an argument name that represents no mandatory or
+%   optional argument. That is, a value specified for a comment alias is not
+%   used as an argument to the |command| and can, hence, be used for capturing
+%   comments or values for future use.
+% \end{description}
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={alias}]
+% \NewMultilangCmd{\Sec}{
+%   command=\section, margs=title, oargs=short,
+%   alias/heading=title,
+%   alias/both={title,short},
+%   alias/remark}
+% \Sec{
+%   both/english={Foobar}{Foo},
+%   both/german ={Dingsda}{Dings}}
+% \Sec{
+%   heading=Baz,
+%   remark={select heading+translate}}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsection{Multilingual Environments}
+%
+% \NiceDescribeMacro{\NewMultilangEnv}{\marg{environment}\marg{options}}
+% The usage of the |\NewMultilangEnv| macro is analogous to the usage of
+% the macro |\NewMultilangCmd|, except for the following differences:
+% \begin{itemize}[noitemsep]
+% \item The first argument, \meta{environment}, expects the name of an
+%   environment that shall be defined.
+% \item In the \meta{options}, the |environment| key substitutes the |command|
+%   key and expects an environment name.
+% \item The |starred| key is not available. Following standard \LaTeX{}
+%   practices, if you want to define a starred environment, simply use the
+%   starred name for \meta{environment}.
+% \end{itemize}
+% Due to the similarity to |\NewMultilangCmd|, we don't provide separate
+% examples for all the individual features.
+% Continuing the line of examples started before, we again use an example
+% about sections -- just now with an environment for section boxes, as
+% provided by the \textsf{sectionbox} package.
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={NewMultilangEnv}]
+% \usepackage{sectionbox}
+% \NewMultilangEnv{SecBox}{
+%   environment=sectionbox,
+%   disablable, margs=title, oargs=width}
+%
+% \begin{SecBox}{title=Foo}
+%   content
+% \end{SecBox}
+%
+% \begin{SecBox}{disabled,title=Bar}
+%   disabled content
+% \end{SecBox}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \section{Extensible Argument Types}
+% \label{sec:Types}
+%
+% By default, an argument |arg| in a multilingual macro can be specified in
+% three ways: just ``|arg=...|'', ``|arg/|\meta{language}|=...|'', or
+% ``|arg/|\meta{language}|!=...|''.
+% The \ThisPackage package enables one to declare further so called `types'.
+% These types can be used in place of \meta{language} in the argument syntax.
+% They can be used for uniformly enabling a special formatting if an argument
+% is of a particular type (rather than just being text).
+%
+% \NiceDescribeMacro{\NewMultilangType}{\oarg{argcount}\marg{typename}\marg{format}}
+% The |\NewMultilangType| macro declares the \meta{typename} type.
+% Values passed to arguments of this type must consist of \meta{argcount}
+% arguments (default: 1). The value is then formatted with \meta{format} when
+% displayed. The \meta{format} can (and should) contain positional parameters
+% such as ``|#1|'' for the first argument.
+% The remainder of this \lcnamecref{sec:Types} demonstrates the use of
+% the macro by examples.
+%
+%
+% \subsection{Dates via \textsf{datetime2}}
+%
+% The \textsf{datetime2} package supports regional (language-specific)
+% formatting of dates. We can build on this feature such that we don't
+% have to provide translations of dates. To keep the display
+% smaller, we here use |\textbf| rather than |\section|.
+%
+% \begin{LTXexample}[morekeywords={NewMultilangType,date,daterange}]
+% \usepackage[useregional]{datetime2}
+%
+% \NewMultilangType{date}{\DTMdate{#1}}
+% \NewMultilangType[2]{daterange}
+%    {\DTMdate{#1}--\DTMdate{#2}}
+%
+% \NewMultilangCmd{\Bold}
+%    {margs=title, command=\textbf}
+%
+% Date:  \Bold{title/date={2017-08-01}}\\
+% Range: \Bold{title/daterange=
+%          {2017-01-01}{2017-08-01}}
+% \end{LTXexample}
+%
+%
+% \subsection{Nesting Multilingual Macros}
+%
+% Multilingual macros can be used in arguments to multilingual macros.
+% Coming back to the original motivation for developing \ThisPackage
+% -- CVs -- you might want a translated two-column layout in which the
+% right column might be filled with translated list items. The following
+% example shows how this can be realized.
+%
+% \begin{LTXexample}
+% \usepackage{enumitem}% for "nosep"
+%
+% \newcommand\entry[2]{%
+%    \begin{tabular}{p{1cm}p{4cm}}#1&#2
+%    \end{tabular}}
+%
+% \NewMultilangType{list}{%
+%    \begin{minipage}[t]{4cm}
+%    \begin{itemize}[nosep]#1
+%    \end{itemize}\end{minipage}}
+% \NewMultilangCmd{\Entry}
+%    {margs={head,text}, command=\entry}
+% \NewMultilangCmd{\Item}
+%    {margs=name, command=\item}
+%
+% \Entry{head=2017,
+%   text/list={
+%     \Item{name/english=foobar,
+%           name/german =Dingsda}
+%     \Item{name=multilang}}}
+% \end{LTXexample}
+%
+%
+% \section{Extension Packages}
+% \label{sec:Extensions}
+%
+% The \ThisPackage package comes bundled with a few generic packages that build
+% on \ThisPackage. These packages are described below.
+%
+% \subsection{Sectioning Environments}
+%
+% Sectioning environments are provided by the \textsf{multilang-sect} package.
+% That package defines, for each of \LaTeX's sectioning macros (|\section|,
+% \ldots, |\subparagraph|) an environment and a starred environment.
+%
+% \NiceDescribeEnv[Section,Section*]{Section(*)}{\marg{data}}
+% This environment shows a section.
+% It has a single, mandatory argument, named |title|.
+% It is a disablable environment, i.e., the argument |disabled| can be used in
+% \meta{data} to disable the display of the whole section.
+% This environment acts as a proxy for the |\section| macro as it is used by
+% \ThisPackage (i.e., without optional argument and without the star).
+
+% \NiceDescribeEnv[SubSection,SubSection*]{SubSection(*)}{\marg{data}}
+% This environment is analogous to the |Section| environment, just for
+% sub-sections.
+
+% \NiceDescribeEnv[SubSubSection,SubSubSection*]{SubSubSection(*)}{\marg{data}}
+% This environment is analogous to the |Section| environment, just for
+% sub-sub-sections.
+
+% \NiceDescribeEnv[Paragraph,Paragraph*]{Paragraph(*)}{\marg{data}}
+% This environment is analogous to the |Section| environment, just for
+% paragraphs.
+
+% \NiceDescribeEnv[SubParagraph,SubParagraph*]{SubParagraph(*)}{\marg{data}}
+% This environment is analogous to the |Section| environment, just for
+% sub-paragraphs.
+% Examples:
+%
+% \SaveSecs
+% \begin{LTXexample}[morekeywords={Section,SubSection}]
+% \usepackage{multilang-sect}
+%
+% \begin{Section}{
+%     title/english = Usage,
+%     title/german  = Benutzung,
+%   }
+%   (section content)
+%   \begin{SubSection*}{
+%       title/english = Package Options,
+%       title/german  = Paketoptionen,
+%     }
+%     (subsection content)
+%   \end{SubSection*}
+% \end{Section}
+% \end{LTXexample}
+% \RestoreSecs
+%
+%
+% \subsection{Tags}
+%
+% Tags are an alternative to individually disabling macros or environments.
+% They are provided by the \textsf{multilang-tags} package.
+% A tag is just a word and sets of tags can be assigned to individual usages of
+% multilingual macros and environments.
+% As long as no tag filter policy is setup, specifying tags does not influence
+% what is displayed.
+%
+% \NiceDescribeMacro{\SetTagFilter}{\oarg{default}\marg{policy}}
+% The |\SetTagFilter|\oarg{default}\marg{policy} sets up a tag filter policy.
+% The \meta{policy} is a comma-separated list of |accept|/|deny| rules.
+% The \meta{default} argument is either |accept| (the default) or |deny| and
+% specifies the default policy.
+% The following toy example demonstrates tag filtering:
+% 
+% \begin{LTXexample}[morekeywords={SetTagFilter,tags}]
+% \usepackage{multilang-tags}
+% \NewMultilangCmd{\Item}{disablable,
+%   command=\item,oargs=dd,margs=dt,
+%   alias/both={dd,dt}}
+% \SetTagFilter{accept={A}, deny={D}}
+%
+% \begin{description}
+% \Item{tags=A,     both={1}{tagged A}}
+% \Item{tags={A,D}, both={2}{tagged A,D}}
+% \Item{tags=D,     both={3}{tagged D}}
+% \Item{tags={D,X}, both={4}{tagged D,X}}
+% \Item{tags=!D,    both={5}{tagged !D}}
+% \Item{tags=X,     both={6}{tagged X}}
+% \end{description}
+% \end{LTXexample}
+%
+% When a multilingual macro, such as |\BasicEntry| in the above example, is
+% used, whether the macro content is displayed is determined as follows:
+% \begin{itemize}[nosep]
+% \item If no |tags| are specified or no tag policy is setup, then the macro
+%   content is displayed.
+% \item Otherwise, the rules of the tag policy are processed in sequential order
+%   until the specified |tags| match a rule.
+%   A |tags| list matches a rule if at least one tag in the |tags| occurs in the
+%   rule (with or without ``|!|'' prefix).
+%   Let $t$ be the last tag in |tags| that occurs in the rule.
+%   \begin{itemize}[nosep]
+%   \item The macro content is displayed if the rule is an |accept| rule and $t$
+%     is not prefixed with ``|!|'', or if the rule is a |deny| rule and $t$ is
+%     prefixed with ``|!|''.
+%   \item Otherwise the display of the macro content is disabled.
+%   \end{itemize}
+% \item If the specified |tags| match no rule in the \meta{policy}, then the
+%   macro content is displayed if and only if the \meta{default} is |accept|.
+% \end{itemize}
+%
+% Rather than directly setting up a filter policy, one can also use the
+% following macros to first define filter policies and then select one for use.
+%
+% \NiceDescribeMacro{\DefineTagFilter}{\marg{name}\marg{default}\marg{policy}}
+% This macro defines a tag filter policy with name \meta{name} to represent the
+% given \meta{policy} and \meta{default}.
+%
+% \NiceDescribeMacro{\UseTagFilter}{\marg{name}}
+% This macro uses the tag filter policy with name \meta{name}.
+%
+% Further examples:
+% \begin{LTXexample}[morekeywords={DefineTagFilter,UseTagFilter,tags},preset={\NewMultilangCmd{\Item}{disablable,command=\item,oargs=dd,margs=dt,alias/both={dd,dt}}}]
+% \DefineTagFilter{Show}{accept}{}
+% \DefineTagFilter{Hide}{deny}{}
+% \DefineTagFilter{OnlyA}{accept}{accept=A,
+%                                 deny={D,X}}
+% \begin{description}
+% \UseTagFilter{Hide}
+% \Item{            both={1}{no tag}}
+% \Item{tags=D,     both={2}{tagged D}}
+% \UseTagFilter{OnlyA}
+% \Item{tags={D,!X},both={3}{tagged D,!X}}
+% \Item{tags={!X,D},both={4}{tagged !X,D}}
+% \end{description}
+% \end{LTXexample}
+%
+%
+% \section{Questions and Answers}
+%
+% \begin{description}
+% \item[Can't I achieve the same thing simpler?]
+%   To some extent, you can.
+%   A variety of ad-hoc solutions to managing translations in \LaTeX{}
+%   documents exist.\footnote{see, e.g.,
+%   \url{https://tex.stackexchange.com/q/5076}}
+%   An obvious approach is the following:
+%   \SaveSecs
+%   \begin{LTXexample}
+% \newcommand\inEnglish[1]{#1}
+% \newcommand\inGerman[1]{}
+%
+% \inEnglish{\section{Foobar}}
+% \inGerman{\section{Dingsda}}
+% % or
+% \section{\inEnglish{Foobar}
+%          \inGerman{Dingsda}}
+%   \end{LTXexample}
+%   \RestoreSecs
+%   That is, for each translation language you define a macro with one
+%   argument; the macro for the ``selected'' language expands to the argument
+%   while all other macros have an empty expansion.
+%   An obvious advantage of this approach over \ThisPackage is that it does
+%   not require learning how to use \ThisPackage.
+%   However, in my opinion, the approach has the following disadvantages:
+%   \begin{itemize}[nosep]
+%   \item Both the first variant and the second variant in the example make
+%     the code more difficult to read due to the nesting of macros and the
+%     curly braces.
+%   \item The first variant even requires the |\section| macro to be repeated
+%     for each language.
+%   \item The second variant easily gets chaotic if instead of |\section| a
+%     macro with several arguments is used.
+%   \end{itemize}
+%   Solutions with conditionals (e.g., |\ifEnglish ...\else ...\fi|) share the
+%   disadvantages of above approach (except the curly braces) and additionally
+%   have an inherent asymmetry that becomes particularly apparent if more than
+%   two languages are involved.
+%   Similar arguments apply to other ad-hoc solutions I have seen.
+%   That is, I find documents based on such approaches cumbersome to maintain
+%   and, hence, requiring more careful checks for ensuring consistency.
+%   
+% \item[Can I use \ThisPackage with \textsf{polyglossia} instead of \textsf{babel}?]
+%   Yes, you can use either one for selecting the language of your document.
+%
+% \item[Can I switch the language mid-document?]
+%   You can switch the language mid-document (e.g., using Babel's
+%   |selectlanguage| environment), but this does not effect what the
+%   multilingual macros or environments defined via \ThisPackage.
+%   The language that is displayed by a macro or environment is determined at
+%   the time of loading \ThisPackage.
+%   Future versions of \ThisPackage might add support for switching languages
+%   mid-document, though.
+%
+% \item[Are language dialects supported?]
+%   No, currently they are not supported.
+%
+% \item[Can I store the ``result'' of a multilingual macro in another macro?]
+%   No.
+%   You can store the macro itself (e.g., via |\newcommand|), but storing the
+%   result of the multilingual macro in a macro (e.g., via |\edef|) is not
+%   possible, as the multilingual macros are not expandable.
+% \end{description}
+%
+%
+% \section{Related Packages}
+%
+% I'm not aware of any \LaTeX{} packages that pursue similar goals or
+% provide similar functionality.
+% CTAN provides a list of many packages for supporting more than one
+% language.\footnote{\url{https://www.ctan.org/topic/multilingual}}
+% In the following, we compare against some of these packages.
+%
+% \begin{description}
+% \item[\textsf{babel}, \textsf{polyglossia}:]
+%   These package provide support for selecting a document language and
+%   switching the document language within a document. The selected language
+%   is then used for hyphenation and other layouting aspects.
+%   Providing multiple translations of pieces of content is not particularly
+%   facilitated by the two packages.
+%
+%   The \ThisPackage package builds on \textsf{babel} or \textsf{polyglossia}
+%   for determining the selected language and for forced foreign-language
+%   formatting (as illustrated in \cref{sec:Usage-margs}).
+%
+% \item[\textsf{translations}:]
+%   This package aims primarily aims at package authors, providing them an
+%   easy interface for providing translations of package-specific terms.
+%   Essentially, one declares translations for terms up-front and then later
+%   can use these translations.
+%
+%   The separation of translations and the use of terms is beneficial
+%   for the maintenance of packages and documents in which individual terms
+%   occur multiple times. However, I assume that this separation would make it
+%   harder to maintain documents in which most translated units occur only
+%   once and at a particular location in the document.
+%
+%   One could combine the virtues of \textsf{translations} and \ThisPackage as
+%   follows:
+%   \SaveSecs
+%   \begin{LTXexample}[morekeywords={DeclareTranslation,GetTranslation},preset={\let\DeclareTranslation=\addtranslation}]
+% % in preamble
+% \usepackage{translations}
+% \DeclareTranslation{english}{foo}{Foobar}
+% \DeclareTranslation{german}{foo}{Dingsda}
+% \NewMultilangType{translate}
+%                  {\GetTranslation{#1}}
+% \NewMultilangCmd{\Sec}{
+%    margs=title, command=\section}
+%
+% % in document
+% \Sec{title/translate=foo}
+%   \end{LTXexample}
+%   \RestoreSecs
+%
+% \item[\textsf{xt\_capts}:]
+%   This package is similar to the \textsf{translations} package, even though
+%   the package's documentation does not explicitly refer to package authors
+%   as the target users. That is, it provides commands for declaring and using
+%   translations of terms.
+%   The main difference to \textsf{translations}, as far as I understand, is
+%   that the user interface of \textsf{translations} is larger and supports
+%   language dialects.
+%   Comparing with \ThisPackage, the same remarks as for \textsf{translations}
+%   apply.
+% \end{description}
+%
+%
+% \clearpage
+%
+% \StopEventually{}
+%\iffalse
+%<*package>
+%\fi
+%
+%
+% \section{Implementation}
+%
+% \subsection{Dependencies}
+%
+% We use \textsf{pgfkeys} for the options parsing, both for the macros defined
+% by \ThisPackage and for the macro defined via the macros in \ThisPackage.
+% We use \textsf{etoolbox} to simplify the internal code.
+%    \begin{macrocode}
+\RequirePackage{pgfkeys,pgfopts}
+\RequirePackage{etoolbox}
+%    \end{macrocode}
+% We use the \textsf{environ} package for scanning and later forgetting the
+% body of disabled multilingual environments.
+%    \begin{macrocode}
+\RequirePackage{environ}
+%    \end{macrocode}
+%
+%
+% \subsection{Package Options}
+%
+% The ``|languages|'' option selects the languages that \ThisPackage knows
+% about.
+%    \begin{macrocode}
+\newcommand\multilang@@langs{}
+\pgfqkeys{/multilang/pkg}{
+  languages/.code={\forcsvlist{\listadd\multilang@@langs}{#1}},
+}
+\ProcessPgfOptions{/multilang/pkg}
+%    \end{macrocode}
+%
+% \subsection{Main Macros}
+%
+% \begin{macro}{\NewMultilangCmd}
+% The |\NewMultilangCmd|\marg{command}\marg{options} macro defines
+% \meta{command} to be a single-argument macro. The argument to \meta{command}
+% specifies, in a key-value list style, the mandatory and optional arguments
+% that are passed to a command specified in \meta{options}.
+%    \begin{macrocode}
+\newcommand\NewMultilangCmd[2]{%
+  \bgroup
+%    \end{macrocode}
+% The following line processes the \meta{options} given and, as its result,
+% defines the macros
+% |\multilang@@actuals|, |\multilang@@checks|, and |\multilang@@keys|.
+%    \begin{macrocode}
+  \multilang@processargs{#1}{/multilang/newcommand}{defaults={},#2}%
+%    \end{macrocode}
+% To handle starred macros, we store the actual macro code into an auxiliary
+% macro and define \meta{command} to be an interface to the auxiliary macro.
+% The next line stores the name of the internal macro.
+%    \begin{macrocode}
+  \expandafter\def\expandafter\multilang@@intcmd\expandafter{%
+    \csname multilang@intcmd@\expandafter\@gobble\string#1\endcsname}%
+%    \end{macrocode}
+% Finally, we create the \meta{command}. The |\edef| starting with the
+% |\egroup| shall expand the three macros constructed above but nothing else
+% such that none of the |\pgfqkeys| result for |#1| spills outside the
+% |\NewMultilangCmd|.
+%    \begin{macrocode}
+  \edef\do{\egroup
+    \expandonce{\multilang@@keys}%
+    \ifbool{multilang@@starred}{%
+%    \end{macrocode}
+% The following handles the case of a |starred| macro. We define the macro
+% that scans for the star (\meta{command}) as well as the internal macro that
+% does the actual work.
+%    \begin{macrocode}
+      \unexpanded{\newcommand#1}{%
+        \noexpand\@ifstar
+          {\expandonce{\multilang@@intcmd}{*}}%
+          {\expandonce{\multilang@@intcmd}{}}}%
+    }{%
+%    \end{macrocode}
+% The following handles the case of a non-|starred| macro. Here we make
+% \meta{command} directly resort to the internal macro.
+%    \begin{macrocode}
+      \unexpanded{\newcommand#1}{\expandonce{\multilang@@intcmd}{}}%
+    }%
+%    \end{macrocode}
+% The remainder of the macro code defines the internal macro, with signature
+% \meta{\cs{multilang@@keys}}\marg{decoration}\marg{kvarg}.
+% The \meta{decoration} can assume any symbols that shall directly be put
+% after the command encapsulated by |command|. A particular use for the
+% \meta{decoration} argument is the ``|*|'' symbol for a |starred| macro.
+%    \begin{macrocode}
+    \noexpand\newcommand{\expandonce{\multilang@@intcmd}}[2]{%
+%    \end{macrocode}
+% First, \meta{command} parses its argument using \textsf{pgfkeys}.
+%    \begin{macrocode}
+      \bgroup
+      \noexpand\boolfalse{multilang@cmd@@disabled}%
+      \noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        \expandonce{\multilang@@defaults},####2}%
+      \noexpand\ifbool{multilang@cmd@@disabled}%
+%    \end{macrocode}
+% If the macro is disabled, simply use an empty invocation
+% |\multilang@@invok|.
+%    \begin{macrocode}
+        {\unexpanded{\def\multilang@@invok{}}}%
+%    \end{macrocode}
+% Otherwise, first check the arguments and afterwards define
+% |\multilang@@invok| to contain \meta{command}, \meta{decoration} (in
+% |####1|), and the actual arguments (in |\multilang@@actuals|).
+%    \begin{macrocode}
+        {\expandonce{\multilang@@checks}%
+          \unexpanded{\edef\multilang@@invok}{%
+            \noexpand\unexpanded{\expandonce{\multilang@@cmd}}####1%
+              \expandonce{\multilang@@actuals}}}%
+%    \end{macrocode}
+% Finally, \meta{command} invokes the command specified via the |command| key.
+% The invocation happens outside the local group, just for the case that makes
+% a difference with the |command|.
+%    \begin{macrocode}
+      \unexpanded{\expandafter\egroup\multilang@@invok}%
+    }%
+  }\do}
+%    \end{macrocode}
+%
+%
+% \begin{macro}{\NewMultilangEnv}
+% The |\NewMultilangEnv|\marg{environment}\marg{options} macro defines
+% \meta{environment} to be a single-argument environment. The argument to
+% \meta{environment} specifies, in a key-value list style, the mandatory and
+% optional arguments that are passed to an environment specified in
+% \meta{options}.
+%    \begin{macrocode}
+\newcommand\NewMultilangEnv[2]{%
+  \bgroup
+%    \end{macrocode}
+% The following line processes the \meta{options} given and, as its result,
+% defines the macros
+% |\multilang@@actuals|, |\multilang@@checks|, and |\multilang@@keys|.
+%    \begin{macrocode}
+  \multilang@processargs{#1}{/multilang/newenvir}{defaults={},#2}%
+%    \end{macrocode}
+% Finally, we create the \meta{environment}. The |\edef| starting with the
+% |\egroup| shall expand the three macros constructed above but nothing else
+% such that none of the |\pgfqkeys| result for |#1| spills outside the
+% |\NewMultilangEnv|. We also pay attention that as few as possible internal
+% macros spill into the environment or even the code that begins the
+% environment.
+%    \begin{macrocode}
+  \edef\do{\egroup
+    \expandonce{\multilang@@keys}%
+    \unexpanded{\newenvironment{#1}}[1]{%
+%    \end{macrocode}
+% First, \meta{command} parses its argument using \textsf{pgfkeys}.
+%    \begin{macrocode}
+      \bgroup
+      \noexpand\boolfalse{multilang@cmd@@disabled}%
+      \noexpand\pgfqkeys{\multilang@keyof{#1}}{####1}%
+      \noexpand\ifbool{multilang@cmd@@disabled}%
+%    \end{macrocode}
+% If the body shall be disabled, then we don't perform checks on the
+% arguments, don't open |environment| but rather collect the body of the
+% environment and finally also ignore the code for closing |environment| (via
+% |\multilang@noend|). Through this trick, we avoid defining an additional
+% macro for switching in the end-block of the environment.
+%    \begin{macrocode}
+        {\unexpanded{%
+          \def\multilang@@invok{\Collect@Body{\multilang@noend}}}}%
+%    \end{macrocode}
+% First check the arguments and afterwards define
+% |\multilang@@invok| to contain the opening code for the environment,
+% including the actual arguments (in |\multilang@@actuals|).
+%    \begin{macrocode}
+        {\expandonce{\multilang@@checks}%
+        \unexpanded{\edef\multilang@@invok}{%
+          \noexpand\noexpand\noexpand\begin{\multilang@@env}%
+            \expandonce{\multilang@@actuals}}}%
+%    \end{macrocode}
+% Finally, \meta{environment} begins the environment specified via the
+% |environment| key. This happens outside the local group, such that the
+% internal macros set via |\pgfqkeys| are not visible anymore when the
+% environment is started.
+%    \begin{macrocode}
+      \unexpanded{\expandafter\egroup\multilang@@invok}%
+    }{%
+%    \end{macrocode}
+% The following implements the closing of the environment.
+%    \begin{macrocode}
+      \noexpand\end{\multilang@@env}%
+    }%
+  }\do}
+%    \end{macrocode}
+%
+%
+% \subsubsection{Option Keys}
+%
+% We first setup the shared keys for the \meta{options} argument of
+% |\NewMultilangCmd| and |\NewMultilangEnv|.
+%    \begin{macrocode}
+\pgfqkeys{/multilang/cmd-or-env}{
+  margs/.store in={\multilang@@margs},
+  oargs/.store in={\multilang@@oargs},
+  alias/.is family,
+  alias/.unknown/.code={%
+    \listeadd{\multilang@@aliases}{\pgfkeyscurrentname}%
+    \csdef{multilang@@alias@\pgfkeyscurrentname}{#1}},
+  defaults/.store in={\multilang@@defaults},
+  disablable/.is if={multilang@@disablable},
+}
+\newbool{multilang@@disablable}
+\newbool{multilang@cmd@@disabled}
+%    \end{macrocode}
+%
+% Next, we setup the specific keys for |\NewMultilangCmd|.
+%    \begin{macrocode}
+\pgfqkeys{/multilang/newcommand}{
+  .search also={/multilang/cmd-or-env},
+  command/.store in={\multilang@@cmd},
+  starred/.is if={multilang@@starred},
+  alias/.search also={/multilang/cmd-or-env},
+}
+\newbool{multilang@@starred}
+%    \end{macrocode}
+% \end{macro}
+% Finally, the specific keys for |\NewMultilangEnv|.
+%    \begin{macrocode}
+\pgfqkeys{/multilang/newenvir}{
+  .search also={/multilang/cmd-or-env},
+  environment/.store in={\multilang@@env},
+  alias/.search also={/multilang/cmd-or-env},
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsection{Registration of Datatypes}
+%
+% \begin{macro}{\NewMultilangType}
+% The |\NewMultilangType|\oarg{argcount}\marg{typename}\marg{format} macro
+% registers the name \meta{typename} as a type that can be used for specifying
+% \ThisPackage arguments. The type has \meta{argcount} arguments (default: 1)
+% and is formatted according to code \meta{format}.
+% Note that the definition of types is group-local. That is, if
+% |\NewMultilangType| is used within a group, \meta{typename} is only
+% available inside that group.
+%    \begin{macrocode}
+\newcommand\NewMultilangType[3][1]{%
+%    \end{macrocode}
+% We first record the new type's name (in |\multilang@@types|) and store both
+% \meta{argcount} and \meta{format} in macros.
+%    \begin{macrocode}
+  \listadd\multilang@@types{#2}%
+  \expandafter\newcommand\csname multilang@@typecmd@#2\endcsname[#1]{#3}%
+  \csdef{multilang@@typeargc@#2}{#1}%
+%    \end{macrocode}
+% Finally, we also store the invocation of the \meta{format} code macro.
+% This is a bit cumbersome, as for all possible argument counts we provide the
+% respective number of arguments. I did not yet find a more elegant way to
+% achieve that the |style n args| code in |\multilang@regfieldtype| invokes
+% \meta{format} properly with \meta{argcount} arguments.
+% \meta{argcount} and \meta{format} in macros.
+%    \begin{macrocode}
+  \ifcase#1\relax
+     \csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}}%
+%    \end{macrocode}
+% For one argument, we check a special case: \meta{format} is the identity
+% function. In this case, we directly expand to the argument itself, i.e., we
+% unfold \meta{format}. We do this such that emptiness of optional arguments
+% can be checked by a |command| or |environment| without having to expand the
+% \meta{format} (which might not work out if \meta{format} is not expansible).
+% For instance, KOMA's |\section| macro hides the TOC entry for
+% |\section[]{...}| but not for |\section[\X]{...}| even if |\X| expands to an
+% empty result.
+%    \begin{macrocode}
+  \or\ifcsequal{multilang@@typecmd@#2}{@firstofone}%
+    {\csdef{multilang@@runcmd@#2}{####1}}%
+    {\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}{####5}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}{####5}{####6}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}{####5}{####6}{####7}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}{####5}{####6}{####7}{####8}}%
+  \or\csdef{multilang@@runcmd@#2}{\csuse{multilang@@typecmd@#2}%
+      {####1}{####2}{####3}{####4}{####5}{####6}{####7}{####8}{####9}}%
+  \else\multilang@error{Argument count expected to be between 0 and 9, %
+                        but is '#1'}\fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@@types}
+% The |\multilang@@types| macro collects and holds an \textsf{etoolbox} list
+% of datatypes defined via |\NewMultilangType|.
+%    \begin{macrocode}
+\newcommand\multilang@@types{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\NewMultilangType@code}
+% The |\NewMultilangType@code|\oarg{argcount}\marg{typename}\marg{format}
+% macro is an internal counterpart to |\NewMultilangType| with which not
+% not the |.style| but the |.code| property of the \meta{typename} key is
+% defined. This is indicated by defining the
+% |\multilang@@codetype@|\meta{typename} macro here and checking whether this
+% macro is defined in |\multilang@regfieldtype|.
+%    \begin{macrocode}
+\newcommand\NewMultilangType@code[3][1]{%
+  \csdef{multilang@@codetype@#2}{true}%
+  \NewMultilangType[#1]{#2}{#3}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@regfield}
+% The |\multilang@regfield|\marg{cmd-or-env}\marg{fieldname} macro registers
+% the respective \textsf{pgfkeys} keys for \meta{fieldname} for all registered datatypes.
+%    \begin{macrocode}
+\newcommand\multilang@regfield[2]{%
+  \pgfqkeys{\multilang@keyof{#1}}{%
+    #2/.code={\csdef{multilang@@val@#2}{##1}}}%
+  \forlistloop{\multilang@regfieldtype{#1}{#2}}{\multilang@@types}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@regfieldtype}
+% The |\multilang@regfieldtype|\marg{cmd-or-env}\marg{fieldname}\marg{typename}
+% macro registers the \textsf{pgfkeys} key for \meta{typename} of
+% \meta{fieldname}.
+%    \begin{macrocode}
+\newcommand\multilang@regfieldtype[3]{%
+  \bgroup
+%    \end{macrocode}
+% In the following, we check whether the number of arguments for the
+% \meta{typename} macro is 1, because for some reason |style n args| seems not
+% to work as we want it to work if $n=1$.
+%    \begin{macrocode}
+  \ifnumequal{\csuse{multilang@@typeargc@#3}}{1}{%
+    \ifcsdef{multilang@@codetype@#3}{%
+      \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        #2/#3/.code={\csexpandonce{multilang@@runcmd@#3}}%
+      }}%
+    }{%
+      \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        #2/#3/.style={#2={\csexpandonce{multilang@@runcmd@#3}}}%
+      }}%
+    }%
+  }{%
+    \ifcsdef{multilang@@codetype@#3}{%
+      \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        #2/#3/.code n args={\csuse{multilang@@typeargc@#3}}%
+                           {\csexpandonce{multilang@@runcmd@#3}}}}%
+    }{%
+      \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        #2/#3/.style n args={\csuse{multilang@@typeargc@#3}}%
+                           {#2={\csexpandonce{multilang@@runcmd@#3}}}}}%
+    }%
+  }\do}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsubsection{Argument Aliases}
+%
+% \begin{macro}{\multilang@regcomb}
+% The |\multilang@regcomb|\marg{cmd-or-env}\marg{alias}\marg{fields}
+% macro registers an \meta{alias} argument for \meta{fields}.
+%    \begin{macrocode}
+\newcommand\multilang@regcomb[3]{%
+  \multilang@regcombtype{#1}{#2}{#3}{}%
+  \forlistloop{\multilang@regcomb@i{#1}{#2}{#3}}{\multilang@@types}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@regcomb@i}
+% The
+% |\multilang@regcomb@i|\marg{cmd-or-env}\marg{alias}\marg{fields}\marg{type}
+% macro is an auxiliary front-end to |\multilang@regcombtype| that transforms
+% \meta{type} to a key \meta{suffix} (by prepending a ``|/|'').
+%    \begin{macrocode}
+\newcommand\multilang@regcomb@i[4]{%
+  \multilang@regcombtype{#1}{#2}{#3}{/#4}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@regcombtype}
+% The
+% |\multilang@regcombtype|\marg{cmd-or-env}\marg{alias}\marg{fields}\marg{suffix}
+% registers the \meta{alias} with the given type-\meta{suffix}.
+%    \begin{macrocode}
+\newcommand\multilang@regcombtype[4]{%
+  \bgroup
+%    \end{macrocode}
+% We count the number of field names in \meta{fields} (in |\@tempcnta|) and,
+% in the same loop, gather the individual field assignments (in |\toks@|).
+%    \begin{macrocode}
+  \toks@{}\@tempcnta=0\relax
+  \forcsvlist{%
+    \advance\@tempcnta by1\relax
+    \expandafter\multilang@regcomb@set\expandafter{\the\@tempcnta}{#4}%
+  }{#3}%
+%    \end{macrocode}
+% Finally, we set the style for the \meta{alias}\meta{suffix} key. Again we
+% separately handle the case of a single field. Additionally, we treat also
+% the case of \emph{no} field special: It gets a |style| (with 1 argument),
+% but the argument is essentially ignored (as |\toks@| is empty). This makes
+% \meta{alias} a ``comment'' field that is not passed to the |command| or
+% |environment|.
+%    \begin{macrocode}
+  \ifnumgreater{\the\@tempcnta}{1}{%
+    \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+      #2#4/.style n args={\the\@tempcnta}{\the\toks@}}}%
+  }{%
+    \edef\do{\egroup\noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+      #2#4/.style={\the\toks@}}}%
+  }%
+  \do}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@regcomb@set}
+% The |\multilang@regcomb@set|\marg{index}\marg{suffix}\marg{field} macro
+% appends the sequence ``\meta{field}\meta{suffix}|={#|\meta{index}|}|'' to
+% the |toks@| register.  When used in a |.style n args| key, this sets the
+% ``\meta{field}\meta{suffix}'' key to the \meta{index}-th positional
+% parameter.
+%    \begin{macrocode}
+\newcommand\multilang@regcomb@set[3]{%
+  \toks@\expandafter{\the\toks@,#3#2={###1}}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \subsubsection{Language ``Types''}
+%
+% \begin{macro}{\multilang@addlanguage}
+% The |\multilang@addlanguage|\marg{language} registers \meta{language},
+% essentially registering ``\meta{language}'' and ``\meta{language}|!|'' as
+% argument datatypes.
+%    \begin{macrocode}
+\newcommand\multilang@addlanguage[1]{%
+%    \end{macrocode}
+% The following checks the current language (|\languagename|) against
+% \meta{language}. In the following,
+% |##1| is the argument to the key when the key is used.
+%    \begin{macrocode}
+  \ifdefstring{\languagename}{#1}%
+    {\NewMultilangType{#1}{##1}}%
+    {\NewMultilangType@code{#1}{}}%
+%    \end{macrocode}
+% The following defines the ``\meta{language}|!|'' key for forcing an
+% argument to be formatted in language \meta{language}.
+%    \begin{macrocode}
+  \NewMultilangType{#1!}{\foreignlanguage{#1}{##1}}}
+%    \end{macrocode}
+% \end{macro}
+% Register all languages passed as argument to the package.
+%    \begin{macrocode}
+\forlistloop{\multilang@addlanguage}{\multilang@@langs}
+%    \end{macrocode}
+%
+%
+% \subsection{Auxiliary Macros}
+%
+% \begin{macro}{\multilang@keyof}
+% The |\multilang@keyof|\marg{cmd-or-env}, when fully expanded such as in the
+% first argument of the |\pgfqkeys| macro, represents the key under which the
+% parameter keys of the command or environment \meta{cmd-or-env} are stored.
+% Note that the branching in the code below checks whether \meta{cmd-or-env}
+% is a command sequence (|true| case) or not (|false| case).
+%    \begin{macrocode}
+\newcommand\multilang@keyof[1]{%
+  \ifcat\relax\noexpand#1%
+    /multilang/cmd/\expandafter\@gobble\string#1%
+  \else
+    /multilang/env/#1%
+  \fi}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@error}
+% The |\multilang@error|\marg{message} macro shows \meta{message} as an error
+% message of the \ThisPackage package.
+%    \begin{macrocode}
+\newcommand\multilang@error[1]{\PackageError{multilang}{#1}{}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@processargs}
+% The |\multilang@processargs|\marg{cmd-or-env}\marg{opt-key}\marg{options}
+% macro processes the \meta{options} in key \meta{opt-key}. Afterwards, it
+% post-processes the arguments |margs|, |oargs|, |alias/...|, and
+% |disablable|.
+% It stores the result of the post-processing in the macros
+% |\multilang@@actuals|, |\multilang@@checks|, and |\multilang@@keys|.
+%    \begin{macrocode}
+\newcommand\multilang@processargs[3]{%
+  \let\multilang@@aliases=\empty
+  \pgfqkeys{#2}{#3}%
+%    \end{macrocode}
+% In the following, we iteratively construct three macros:
+% |\multilang@@actuals|, |\multilang@@checks|, and |\multilang@@keys|.
+% \begin{itemize}[nosep]
+% \item In |\multilang@@actuals|, we step by step construct the arguments that
+%   shall be passed to \meta{cmd-or-env}.
+% \item In |\multilang@@checks|, we construct a list of preliminary checks
+%   that \meta{cmd-or-env} shall perform on its arguments.
+% \item In |\multilang@@keys|, we construct a list of |\pgfqkeys| commands
+%   that set up the keys for \meta{cmd-or-env}'s one argument.
+% \end{itemize}
+% The following first initializes the three macros.
+%    \begin{macrocode}
+  \edef\multilang@@actuals{}%
+  \def\multilang@@checks{}%
+  \def\multilang@@keys{}%
+%    \end{macrocode}
+% We first process the optional arguments. We process them before the
+% mandatory arguments because they must come first in |\multilang@@actuals|.
+% In the following |\do| macro, |##1| iterates over all optional argument
+% names in the |margs| list.
+%    \begin{macrocode}
+  \ifdefvoid{\multilang@@oargs}{}{%
+    \def\do##1{%
+      \appto{\multilang@@actuals}{%
+        \ifcsmacro{multilang@@val@##1}%
+          {[\csexpandonce{multilang@@val@##1}]}%
+          {}%
+      }%
+      \appto{\multilang@@keys}{\multilang@regfield{#1}{##1}}%
+    }%
+    \expandafter\docsvlist\expandafter{\multilang@@oargs}}%
+%    \end{macrocode}
+% Next, we append the mandatory arguments, specified by the |margs| list.
+% In the following |\do| macro, |##1| iterates over all mandatory argument
+% names in the |margs| list.
+%    \begin{macrocode}
+  \ifdefvoid{\multilang@@margs}{}{%
+    \def\do##1{%
+      \appto{\multilang@@actuals}{%
+        {\csexpandonce{multilang@@val@##1}}%
+      }%
+      \appto{\multilang@@checks}{%
+        \ifcsmacro{multilang@@val@##1}%
+          {}%
+          {\multilang@error{mandatory argument ##1 missing}}%
+      }%
+      \appto{\multilang@@keys}{\multilang@regfield{#1}{##1}}%
+    }%
+    \expandafter\docsvlist\expandafter{\multilang@@margs}}%
+%    \end{macrocode}
+% Afterwards, we handle argument aliases. The list of aliases' names is in
+% |\multilang@@aliases| and the list of arguments that a \meta{alias}
+% combines is in |\multilang@@alias@|\meta{alias}.
+% Note that aliases only modify |\multilang@@keys| -- i.e., not
+% |\multilang@@actuals| or |\multilang@@checks|.
+%    \begin{macrocode}
+  \def\do##1{%
+    \eappto{\multilang@@keys}{%
+      \unexpanded{\multilang@regcomb{#1}{##1}}%
+        {\csuse{multilang@@alias@##1}}}}%
+  \expandafter\dolistloop\expandafter{\multilang@@aliases}%
+%    \end{macrocode}
+% To handle |disablable| macros, we simply add the |disabled| key. This key is
+% a Boolean key that just sets a conditional.
+%    \begin{macrocode}
+  \ifbool{multilang@@disablable}%
+    {\eappto{\multilang@@keys}{%
+      \noexpand\pgfqkeys{\multilang@keyof{#1}}{%
+        disabled/.is if={multilang@cmd@@disabled}}}}%
+    {}%
+%    \end{macrocode}
+% Invoke the hook. To avoid macro arguments to the hook, we store the command or
+% environment name in |\multilang@@cmdorenv| and store the \textsf{pgfkeys} key
+% for the command or environment in |\multilang@@cekey|.
+%    \begin{macrocode}
+  \def\multilang@@cmdorenv{#1}%
+  \edef\multilang@@cekey{\multilang@keyof{#1}}%
+  \multilang@hook@processargs
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@hook@processargs}
+% The |\multilang@hook@processargs| macro is a hook that enables extensions to
+% the |\multilang@processargs|.
+%    \begin{macrocode}
+\newcommand\multilang@hook@processargs{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\multilang@noend}
+% The |\multilang@noend|\marg{body} macro is intended to be used as the
+% argument to |\Collect@Body| (or |\collect@body|) of the \textsf{environ}
+% package. In this context, it performs the following:
+% Firstly, it ignores the collected \meta{body} of the environment.
+% Secondly, it temporarily disables the |\end|-code of the environment in
+% which the |\Collect@Body| is expanded.
+%    \begin{macrocode}
+\newcommand\multilang@noend[1]{\cslet{end\@currenvir}{\relax}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\iffalse
+%</package>
+%<*pkgtags>
+%\fi
+%
+% \section{Implementation of Tags}
+%
+% \begin{macro}{\SetTagFilter}
+% The |\SetTagFilter|\oarg{default}\marg{policy} sets the tag filter policy
+% based on accept/deny rules in \meta{policy}.
+%    \begin{macrocode}
+\newcommand\SetTagFilter[2][accept]{%
+  \kcvml@parsepolicy{kcvml@@tagfilter}{#1}{#2}}
+\newcommand\kcvml@@tagfilter{}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\DefineTagFilter}
+% The |\DefineTagFilter|\marg{name}\marg{default}\marg{policy} macro defines a
+% tag filter policy under name \meta{name}.
+%    \begin{macrocode}
+\newcommand\DefineTagFilter[3]{%
+  \kcvml@parsepolicy{kcvml@filter@@#1}{#2}{#3}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\UseFilter}
+% The |\UseTagFilter|\marg{name} macro uses the previously defined tag filter
+% policy with name \meta{name}.
+%    \begin{macrocode}
+\newcommand\UseTagFilter[1]{%
+  \letcs\kcvml@@tagfilter{kcvml@filter@@#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\kcvml@parsepolicy}
+% The |\kcvml@parsepolicy|\marg{csname}\marg{default}\marg{policy}
+% parses a tag filter policy, \meta{policy} with default \meta{default}, and
+% stores the resulting filter in the control sequence \meta{csname}.
+%    \begin{macrocode}
+\newcommand\kcvml@parsepolicy[3]{%
+%    \end{macrocode}
+% We first reset the temporary filter variable |\kcvml@@tmptagfilter| then
+% populate it via |\pgfqkeys|, first with the \meta{policy} list and
+% subsequently with the \meta{default} policy.
+%    \begin{macrocode}
+  \bgroup
+  \def\kcvml@@tmptagfilter{}%
+  \pgfqkeys{kcvml/tagfilter}{#3,default/#2}%
+%    \end{macrocode}
+% Now we export the temporary |\kcvml@@tmptagfilter| to outside the local group
+% and into the control sequence \meta{csname}.
+%    \begin{macrocode}
+  \edef\do{\egroup
+    \unexpanded{\csdef{#1}}{\expandonce{\kcvml@@tmptagfilter}}}%
+  \do}
+%    \end{macrocode}
+% The following lines specify how |\kcvml@@tmptagfilter| is modified when
+% |accept| or |deny| filter rules are specified.
+%    \begin{macrocode}
+\pgfqkeys{kcvml/tagfilter}{%
+  accept/.code={\kcvml@appendrule{#1}{\boolfalse}{\booltrue}},
+  deny/.code  ={\kcvml@appendrule{#1}{\booltrue}{\boolfalse}},
+  default/accept/.code n args={0}{\appto\kcvml@@tmptagfilter{%
+    \kcvml@applydefault{\boolfalse}}},
+  default/deny/.code n args={0}{\appto\kcvml@@tmptagfilter{%
+    \kcvml@applydefault{\booltrue}}},
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\kcvml@appendrule}
+% The |\kcvml@appendrule|\marg{ruletags}\marg{flagmacro}\marg{invmacro} macro
+% appends a filter rule to the overall tag filter. The rule filters for the
+% given comma-separated list \meta{ruletags}.
+% The \meta{flagmacro} specifies whether a match shall be disabled (if
+% |\booltrue|) or enabled (if |\boolfalse|).
+% The \meta{invmacro} must be the inverse of \meta{flagmacro}.
+%    \begin{macrocode}
+\newcommand\kcvml@appendrule[3]{%
+  \bgroup
+%    \end{macrocode}
+% For simplified later processing, we turn \meta{ruletags} into an
+% \textsf{etoolbox} list (in |\kcvml@@ruletags|) first.
+%    \begin{macrocode}
+  \def\kcvml@@ruletags{}%
+  \forcsvlist{\listadd{\kcvml@@ruletags}}{#1}%
+%    \end{macrocode}
+% Now we append to the overall filter (in |\kcvml@@tmptagfilter|) outside the
+% local group and use the cascade of |\expandafter|s to get |\cvmkl@@ruletags|
+% out of the group without polluting the outer scope.
+%    \begin{macrocode}
+  \expandafter\egroup
+  \expandafter\listadd\expandafter\kcvml@@tmptagfilter\expandafter{%
+    \expandafter\kcvml@applyrule\expandafter{\kcvml@@ruletags}{#2}{#3}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% We add the additional |tags| key to every disablable multilingual macro and
+% environment. For this, we use \textsf{multilang}'s
+% |\multilang@hook@processargs| hook.
+%    \begin{macrocode}
+\appto\multilang@hook@processargs{%
+  \ifbool{multilang@@disablable}%
+    {\eappto{\multilang@@keys}{%
+%    \end{macrocode}
+% Note that in |\multilang@@cekey|, the parent key of the command or environment
+% is stored. Whenever the |tags| argument is used, we make it invoke
+% |\kcvml@applyfilter| with the given \meta{tags} (|##1|).
+%    \begin{macrocode}
+      \noexpand\pgfqkeys{\multilang@@cekey}{%
+        tags/.code={\noexpand\kcvml@applyfilter{##1}}}}}
+    {}}
+%    \end{macrocode}
+%
+% \begin{macro}{\kcvml@applyfilter}
+% The |\kcvml@applyfilter|\marg{tags} macro applies the current filter, which is
+% in the |\kcvml@@tagfilter| \textsf{etoolbox} list, to the comma-separated list
+% \meta{tags} of tags to check whether the entity with the \meta{tags} should be
+% disabled or not. The result of the check is stored in the Boolean flag
+% |multilang@cmd@@disabled| for further use in with \textsf{multilang} code.
+%    \begin{macrocode}
+\newcommand\kcvml@applyfilter[1]{%
+  \ifbool{multilang@cmd@@disabled}{}{%
+%    \end{macrocode}
+% We check the filter only if the entry has not already explicitly been marked
+% as disabled. I.e., explicit disabling takes precedence, no matter whether it
+% is specified before or after a |tags| element.
+% In the Boolean flag |kcvml@@match|, we store whether a tag in \meta{tags}
+% matched one of the accept/deny filters already. After initializing this flag,
+% we iterate through |\kcvml@@tagfilter| with |\do|\marg{rule}, and
+% we stop iterating after a match has been found.
+%    \begin{macrocode}
+  \boolfalse{kcvml@@match}%
+  \def\do##1{%
+%    \end{macrocode}
+% Note that \meta{rule} is a curried macro whose missing last argument,
+% \meta{tags}, is added here.
+%    \begin{macrocode}
+    ##1{#1}%
+    \ifbool{kcvml@@match}{\listbreak}{}}%
+  \dolistloop{\kcvml@@tagfilter}}}
+\newbool{kcvml@@match}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\kcvml@applyrule}
+% The
+% |\kcvml@applyrule|\marg{ruletags}\marg{flagmacro}\marg{invmacro}\marg{tags}
+% macro applies a single filter rule to the given \meta{tags}.
+% The \meta{flagmacro} must be either |\booltrue| or |\boolfalse|.
+% If it is |\booltrue|, this specifies that a match of \meta{tags} against
+% \meta{ruletags} disables the display of the respective entity;
+% If it is |\boolfalse|, this specifies that a match enables the display.
+% The \meta{invmacro} must be the inverse of \meta{flagmacro}.
+% We just check each tag in \meta{tags} individually.
+%    \begin{macrocode}
+\newcommand\kcvml@applyrule[4]{%
+  \forcsvlist{\kcvml@applyrule@i{#1}{#2}{#3}}{#4}}
+%    \end{macrocode}
+%
+% \begin{macro}{\kcvml@applyrule@i}
+% The
+% |\kcvml@applyrule@i|\marg{ruletags}\marg{flagmacro}\marg{invmacro}\marg{tag}
+% macro applies a single filter rule to the given \meta{tag}.
+% It checks whether the \meta{tag} is inverted (i.e., starting with ``|!|'') and
+% hands over the actual check to |\kcvml@applyrule@ii|.
+%    \begin{macrocode}
+\newcommand\kcvml@applyrule@i[4]{%
+  \if !\@car#4\@nil
+    \expandafter\kcvml@applyrule@ii\expandafter{\@cdr#4\@nil}{#1}{#3}%
+  \else
+    \kcvml@applyrule@ii{#4}{#1}{#2}\fi}
+%    \end{macrocode}
+% \begin{macro}{\kcvml@applyrule@ii}
+% The
+% |\kcvml@applyrule@ii|\marg{tag}\marg{ruletags}\marg{flagmacro}
+% macro applies a single filter rule to the given \meta{tag}.
+% We check whether \meta{tag} in in the \textsf{etoolbox} list \meta{ruletags}.
+% Since |\ifinlist| expects a list macro for its second argument (which it then
+% expands once), we just give it |\empty| to eat (expand) and then use
+% \meta{ruletags} as it is.
+%    \begin{macrocode}
+\newcommand\kcvml@applyrule@ii[3]{%
+  \ifinlist{#1}{\empty #2}%
+%    \end{macrocode}
+% If we have a match, we apply \meta{flagmacro} to |multilang@cmd@@disabled| and
+% then record, in |kcvml@@match|, that we found a match.
+%    \begin{macrocode}
+    {#3{multilang@cmd@@disabled}\booltrue{kcvml@@match}}{}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\kcvml@applydefault}
+% The |\kcvml@applydefault|\marg{flagmacro}\marg{tags} macro applies a default
+% filter to \meta{tags}. A \meta{flagmacro} of |\booltrue| corresponds to a
+% ``default deny''; |\boolfalse| corresponds to ``default accept''.
+%    \begin{macrocode}
+\newcommand\kcvml@applydefault[2]{%
+  #1{multilang@cmd@@disabled}}
+%    \end{macrocode}
+% \end{macro}
+%
+%\iffalse
+%</pkgtags>
+%<*pkgsect>
+%\fi
+%
+% \section{Implementation of Sectioning Environments}
+%
+% The sectioning environments are proxies for the corresponding sectioning
+% macros. They are defined as environments such that the whole environments
+% rather than just the headings can be disabled.
+% Each of the environments has one optional argument, |short| (for a short
+% title), and one mandatory argument, |title| (for the actual title).
+%
+% \begin{environment}{Section}
+% \begin{environment}{Section*}
+% The |Section| and |Section*| environments are
+% multilingual proxies to |\section| and, respectively, |\section*|.
+%    \begin{macrocode}
+\NewMultilangEnv{Section}{disablable,
+  environment=section, oargs=short, margs=title}
+\NewMultilangEnv{Section*}{disablable,
+  environment=multilang@secstar, oargs=short, margs=title}
+\newenvironment{multilang@secstar}{\section*}{}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{SubSection}
+% \begin{environment}{SubSection*}
+% The |SubSection| and |SubSection*| environments are
+% multilingual proxies to |\subsection| and, respectively, |\subsection*|.
+%    \begin{macrocode}
+\NewMultilangEnv{SubSection}{disablable,
+  environment=subsection, oargs=short, margs=title}
+\NewMultilangEnv{SubSection*}{disablable,
+  environment=multilang@ssecstar, oargs=short, margs=title}
+\newenvironment{multilang@ssecstar}{\subsection*}{}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{SubSubSection}
+% \begin{environment}{SubSubSection*}
+% The |SubSubSection| and |SubSubSection*| environments are
+% multilingual proxies to |\subsubsection| and, respectively, |\subsubsection*|.
+%    \begin{macrocode}
+\NewMultilangEnv{SubSubSection}{disablable,
+  environment=subsubsection, oargs=short, margs=title}
+\NewMultilangEnv{SubSubSection*}{disablable,
+  environment=multilang@sssecstar, oargs=short, margs=title}
+\newenvironment{multilang@sssecstar}{\subsubsection*}{}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{Paragraph}
+% \begin{environment}{Paragraph*}
+% The |Paragraph| and |Paragraph*| environments are
+% multilingual proxies to |\paragraph| and, respectively, |\paragraph*|.
+%    \begin{macrocode}
+\NewMultilangEnv{Paragraph}{disablable,
+  environment=paragraph, oargs=short, margs=title}
+\NewMultilangEnv{Paragraph*}{disablable,
+  environment=multilang@parstar, oargs=short, margs=title}
+\newenvironment{multilang@parstar}{\paragraph*}{}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+% \begin{environment}{SubParagraph}
+% \begin{environment}{SubParagraph*}
+% The |SubParagraph| and |SubParagraph*| environments are
+% multilingual proxies to |\subparagraph| and, respectively, |\subparagraph*|.
+%    \begin{macrocode}
+\NewMultilangEnv{SubParagraph}{disablable,
+  environment=subparagraph, oargs=short, margs=title}
+\NewMultilangEnv{SubParagraph*}{disablable,
+  environment=multilang@sparstar, oargs=short, margs=title}
+\newenvironment{multilang@sparstar}{\subparagraph*}{}
+%    \end{macrocode}
+% \end{environment}
+% \end{environment}
+%
+%
+%\iffalse
+%</pkgsect>
+%\fi
+% \Finale
+\endinput
